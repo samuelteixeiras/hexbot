@@ -3,6 +3,10 @@ let ctx;
 let appWidth;
 let appHeight;
 
+let positionX = 100;
+let positionY = 100;
+let letter;
+
 // called by NOOPBOT on window.onload
 function start_app() {
 
@@ -10,14 +14,38 @@ function start_app() {
   sizeCanvas();
 
   //set up a ticker to refresh page automatically.
-  let speed = 300; // how often screen refreshes, in milliseconds.
+  let speed = 5000; // how often screen refreshes, in milliseconds.
   let ticker = NOOPBOT_TICK_SETUP(draw, speed);
 
   //fire a draw event.
   draw();
 
   //redraw when canvas is clicked.
-  canvas.addEventListener('click', draw);
+  canvas.addEventListener('click', backStatus);
+  document.addEventListener('keydown', logKey);
+
+  function logKey(e) {
+    console.log(e.key);
+    letter = e.key;
+    getColor();
+  }
+
+}
+
+
+function getColor() {
+  //get the color!
+  NOOPBOT_FETCH({
+    API: 'hexbot',
+    count: 1,
+    width: appWidth,
+    height: appHeight,
+  }, drawLetter);
+}
+
+
+function backStatus(){
+  ctx.restore();
 }
 
 function sizeCanvas() {
@@ -31,10 +59,9 @@ function draw() {
   //get the data!
   NOOPBOT_FETCH({
     API: 'hexbot',
-    count: 1000,
+    count: 1,
     width: appWidth,
     height: appHeight,
-    seed: 'FF7F50,FFD700,FF8C00',
   }, drawSet);
 }
 
@@ -45,10 +72,26 @@ function drawSet(responseJson) {
   })
 }
 
+
+function drawLetter(point){
+
+  ctx.font = "30px Comic Sans MS";
+  ctx.fillStyle = point.value;
+  ctx.textAlign = "center";
+  ctx.fillText(letter, positionX, positionY);
+  positionX=positionX+15;
+
+  if(positionX >= window.innerHeight - 100){
+    positionY = positionY + 30;
+    positionX = 100;
+  }
+
+}
+
 function drawPoint(ctx, point) {
   ctx.fillStyle = point.value;
-  let pointSize = NOOPBOT_RANDOM(1,8);
-  ctx.globalAlpha = Math.random();
+  let pointSize = 5;
+  //ctx.globalAlpha = Math.random();
   ctx.beginPath();
   ctx.arc(point.coordinates.x, point.coordinates.y, pointSize, 0, Math.PI * 2, true);
   ctx.fill();

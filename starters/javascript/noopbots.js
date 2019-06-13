@@ -28,6 +28,7 @@ function NOOPBOT_FETCH(options, onComplete) {
     .then(function(response) {
       return response.json();
     }).then(function(responseJson) {
+      console.log(responseJson);
       onComplete(responseJson)
     });
 }
